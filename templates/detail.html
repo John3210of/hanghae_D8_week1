@@ -23,7 +23,7 @@
     }
 
     function deleteComment(id) {
-         $.ajax({
+        $.ajax({
             type: "DELETE",
             url: `/api/comment/${id}`,
             data: {},
@@ -56,39 +56,35 @@
     <section>
         <div>
             <div>
-                짜장
-                2,300명이 선택했어요! (49.9%)
+                {{ post.img_title_left }}
+                {{ post.count_left }}명이 선택했어요! ({{ percent_left }}%)
             </div>
             <div>
-                짬뽕
-                2,997명이 선택했어요! (50.1%)
+                {{ post.img_title_right }}
+                {{ post.count_right }}명이 선택했어요! ({{ percent_right }}%)
             </div>
         </div>
         <h1>
-            짜장 vs 짬뽕
-            <button type="button">황금 밸런스</button>
+            {{ post.img_title_left }} vs {{ post.img_title_right }}
+            {% if is_gold_balance == True %}
+                <button type="button">황금 밸런스</button>
+            {% endif %}
             <div>
                 <p>50:50의 비율에 가까운 상태의 게시물을 황금밸런스라고 한답니다! A와 B의 우열을 가릴 수 없는 상태라고 보면 되겠죠?</p>
             </div>
         </h1>
 
         <p>
-            100명이 봤어요
+            {{ post.view }}명이 봤어요
         </p>
 
         <p>
             <button type="button">❤</button>
-            29명이 좋아해요
+            {{ post.like }}명이 좋아해요
         </p>
 
         <p>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. A accusamus alias aliquam animi atque consequatur
-            consequuntur corporis cupiditate delectus deleniti dignissimos dolorem enim eos explicabo fugit incidunt laborum
-            magni minima molestias neque nisi odio officia perferendis porro provident quaerat, quam ratione repellat
-            repellendus reprehenderit, repudiandae sequi sit tempore tenetur vero vitae voluptatem. Aut delectus dolore est
-            iure maxime optio tenetur, voluptatibus. Corporis eos eum ex ipsam maiores nam tempore voluptatibus. Asperiores
-            autem beatae cumque dolore dolorem doloribus dolorum ducimus ea eligendi esse et facere, illo impedit ipsam
-            iusto minus molestias neque nihil odit quidem reiciendis reprehenderit repudiandae totam voluptate voluptates.
+            {{ post.description }}
         </p>
 
         <a href="/post">수정</a>
@@ -97,32 +93,24 @@
             <p>정말로 삭제하시겠어요?</p>
         </div>
 
-        <form action="" method="POST">
+        <form>
             <label for="comment">의견을 자유롭게 남겨주세요!</label>
             <textarea id="comment"></textarea>
-            <button type="submit">등록하기</button>
+            <button type="button" onclick="addComment()">등록하기</button>
         </form>
 
-        <h2>댓글(110개)</h2>
+        <h2>댓글({{ comments_count }}개)</h2>
         <ul>
-            <li>
-                <span>닉네임</span>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. A accusamus alias aliquam animi atque
-                </p>
-            </li>
-            <li>
-                <span>닉네임</span>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. A accusamus alias aliquam animi atque
-                </p>
-            </li>
-            <li>
-                <span>닉네임</span>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. A accusamus alias aliquam animi atque
-                </p>
-            </li>
+            {% for comment in comments %}
+                <li>
+                    <span>{{ comment.name }}</span>
+                    <p>
+                        {{ comment.contents }}
+                    </p>
+                    <button type="button">수정</button>
+                    <button type="button" onclick="deleteComment('{{ comment._id }}')">삭제</button>
+                </li>
+            {% endfor %}
         </ul>
     </section>
 </body>
