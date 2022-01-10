@@ -15,6 +15,11 @@ import jwt
 # 비밀번호를 암호화하여 DB에 저장
 import hashlib
 
+from bson import json_util, ObjectId
+import json
+
+import datetime
+
 @app.route('/')
 def list_main():
     return render_template('index.html')
@@ -88,7 +93,27 @@ def api_login():
         return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
 
 
+# [상세 페이지 댓글 추가 API]
+@app.route('/api/comment', methods=['POST'])
+def add_comment():
+    comment_receive = request.form['comment_give']
+
+    date = datetime.datetime.now()
+    date_string = date.strftime('%Y-%m-%d %H:%M')
+
+    doc = {
+       "contents": comment_receive,
+       "posttime": date_string
+    }
+    db.comments.insert_one(doc)
+    return jsonify({'msg': '코멘트 등록 완료!'})
+
+# [상세 페이지 댓글 삭제 API]
+@app.route('/api/comment/<id>', methods=['DELETE'])
+def delete_comment(id):
+    db.comments.delete_one({'_id': ObjectId(id)})
+    return jsonify({'msg': '코멘트 삭제 완료!'})
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
-

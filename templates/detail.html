@@ -3,7 +3,39 @@
 <head>
     <meta charset="UTF-8"/>
     <title>골라보세요 밸런스게임!</title>
+
+    <!-- JQuery import -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
+
+<script>
+    function addComment() {
+        const comment = $('#comment').val();
+        $.ajax({
+            type: "POST",
+            url: "/api/comment",
+            data: {comment_give: comment},
+            success: function (response) {
+                alert(response['msg'])
+                window.location.reload();
+            }
+        })
+    }
+
+    function deleteComment(id) {
+         $.ajax({
+            type: "DELETE",
+            url: `/api/comment/${id}`,
+            data: {},
+            success: function (response) {
+                alert(response['msg'])
+                window.location.reload();
+            }
+        })
+    }
+
+</script>
+
 <body>
     {# 헤더 #}
     <header>
