@@ -156,5 +156,13 @@ def increase_count(id):
     return jsonify({'msg': '당신의 선택은 ' + title_receive + '이군요!'})
 
 
+# [게시글 조회수 증가 API]
+@app.route('/api/view/<id>', methods=['PUT'])
+def increase_view(id):
+    increased_receive = request.form['increased_give']
+    db.posts.update_one({'_id': ObjectId(id)}, {'$set': {'view': increased_receive}})
+    return jsonify({'msg': 'success'})
+
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)

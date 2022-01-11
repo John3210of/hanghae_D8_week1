@@ -9,15 +9,21 @@
 </head>
 
 <script>
+    $(document).ready(function () {
+        // 페이지가 로딩되자마자 게시글의 view를 하나 증가시킵니다.
+        // 아래와 같이 사용하면 jinja2 템플릿에서 사용된 값을 JavaScript로 가져올 수 있습니다.
+        increaseView('{{ post._id | safe }}', {{ post.view | safe }})
+    })
+
     function addComment() {
-        const comment = $('#comment').val();
+        const comment = $('#comment').val()
         $.ajax({
             type: "POST",
             url: "/api/comment",
             data: {comment_give: comment},
             success: function (response) {
                 alert(response['msg'])
-                window.location.reload();
+                window.location.reload()
             }
         })
     }
@@ -29,7 +35,7 @@
             data: {},
             success: function (response) {
                 alert(response['msg'])
-                window.location.reload();
+                window.location.reload()
             }
         })
     }
@@ -41,7 +47,7 @@
             data: {},
             success: function (response) {
                 alert(response['msg'])
-                window.location.reload();
+                window.location.reload()
             }
         })
     }
@@ -53,7 +59,20 @@
             data: {position_give: position, title_give: selectedTitle},
             success: function (response) {
                 alert(response['msg'])
-                window.location.reload();
+                window.location.reload()
+            }
+        })
+    }
+
+    function increaseView(id, currentCount) {
+        const newCount = currentCount + 1
+
+        $.ajax({
+            type: "PUT",
+            url: `/api/view/${id}`,
+            data: {increased_give: newCount},
+            success: function (response) {
+                return
             }
         })
     }
