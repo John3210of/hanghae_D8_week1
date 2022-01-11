@@ -25,9 +25,23 @@ def list_post():
     return render_template('post.html')
 
 
+# 상세 페이지 게시글에 관한 데이터 DB에서 받아오기
 @app.route('/detail')
 def list_detail():
-    return render_template('detail.html')
+    idx_receive = request.args.get('idx')
+    post = db.posts.find_one({'_id': ObjectId(idx_receive)})
+    percent_left = round((post['count_left'] / (post['count_left'] + post['count_right'])) * 100, 1)
+    percent_right = round((post['count_right'] / (post['count_left'] + post['count_right'])) * 100, 1)
+
+    if abs(percent_left - percent_right) < 2:
+        is_gold_balance = True
+    else:
+        is_gold_balance = False
+
+    comments = list(db.comments.find({}))
+    comments_count = len(list(db.comments.find({})))
+    return render_template('detail.html', post=post, percent_left=percent_left, percent_right=percent_right,
+                           comments=comments, comments_count=comments_count, is_gold_balance=is_gold_balance)
 
 
 @app.route('/login')
