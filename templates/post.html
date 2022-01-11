@@ -1,106 +1,173 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-            crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
-
-    <title>벨런스게임 : 게임 만들기</title>
-
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
-
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SUMMER NOTE : include libraries(jQuery, bootstrap) -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- SUMMER NOTE : include summernote css/js -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
     <style>
-        .posting-box {
-            width: 500px;
-            margin-top: 20px;
+        *{ /* html 태그 전체를 선택한다는 의미의 태그입니다 */
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box; /* 박스 안에서 값이 조절되도록 해주는 태그입니다 */
         }
-        .wrap {
-            width: 900px;
-            margin: auto;
+
+        article{
+            width: 30%;
+            margin: 0 auto;
         }
-        .container {
-            padding-left: 50px;
+
+        .list_wrap {
+            /* display: flex를 사용하여 한 줄에 업로드 구역이 두개 올라오도록 하였습니다. */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .list_wrap>li:first-child {
+            margin-right: 40px;
+        }
+
+        .panel-heading.note-toolbar>* {
+            display: none;
+        }
+        .panel-heading.note-toolbar{
+            overflow:hidden;
+        }
+        .note-btn-group.btn-group.note-insert{
+            display:block;
+        }
+        .note-btn-group.btn-group.note-insert>*:nth-child(odd){
+            display:none;
+        }
+        .note-icon-picture::after{
+            /* 기존의 summernote에서 가진 아이콘들을 전부 빼버렸습니다. */
+            /* 그리고 첨부기능과 함께 사진 드래그 기능을 살려  사용자 편의성을 증대시켰습니다. */
+            content:"이미지 첨부";
+            display:inline;
+            margin-left:10px;
+        }
+        textarea {
+            width: 755px;
+            height: 90px;
+
+            resize: none;
         }
     </style>
     <script>
-        $(document).ready(function () {
-            listing()
+        // summernote를 불러오는 JQuery 입니다. (왼쪽 구역)
+        $(document).ready(function() {
+          $('#summernote_left').summernote({
+                height: '100%',
+                width: '100%',
+                lang : 'ko-KR',
+                popover: {
+                    image: [],
+                    link: [],
+                    air: []
+                },
+              // callback 함수를 사용하여 이미지를 첨부하는 기능을 다시 끌고왔습니다.
+              callbacks: {
+                    onImageUpload: function(image) {
+                        for(let i = 0; i < image.length; i++)
+                            uploadImage(image[i]);
+                    }
+              }
+          })
+        })
+        // summernote를 불러오는 JQuery 입니다. (오른쪽 구역)
+        $(document).ready(function() {
+          $('#summernote_right').summernote({
+                height: '100%',
+                width: '100%',
+                lang : 'ko-KR',
+                popover: {
+                    image: [],
+                    link: [],
+                    air: []
+                },
+              callbacks: {
+                    onImageUpload: function(image) {
+                        for(let i = 0; i < image.length; i++)
+                            uploadImage(image[i]);
+                    }
+              }
+          })
         })
 
-        function listing() {
+        // 이미지 업로드 함수를 Ajax로 구현합니다. (페이지가 새로고침 되지 않도록 비동기화)
+        function uploadImage(image) {
+            let data = new FormData();
+            data.append("image", image)
             $.ajax({
-                type: "GET",
-                url: "/diary?sample_give=샘플데이터",
-                data: {},
-                success: function (response) {
-                    alert(response['msg'])
+                url: "{{url_for('upload_image')}}",
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: data,
+                type: "post",
+                success: function(url) {
+                    let image = $("<img>").attr("src", url).css('max-width', "900px");
+                    $("#summernote").summernote("insertNode", image[0]);
+                },
+                error: function (data) {
+                    console.log(data);
+                    alert(data);
                 }
-            })
-        }
-
-        function posting() {
-            let title_left = $('#title_left').value();
-            let content_left = $('#content_left').value();
-            let title_right = $('#title_right').value();
-            let content_right = $('#content_right').value();
-            $.ajax({
-                type: "POST",
-                url: "/diary",
-                data: { title_give_l: title_left, content_give_l: content_left,
-                title_give_r: title_right, content_give_r: content_right},
-                success: function (response) {
-                    alert(response['msg'])
-                    window.location.reload()
-                }
-            })
+            });
         }
     </script>
 
 
+    <title>골라보세요 벨런스게임! : 수정하기</title>
+</head>
+    <body>
+        <article>
+            <form id='create_form' name="form" method="POST" action="/post" >
+                <h4>
+                   <p>작성자
+                   <input type="text" name={{user_id}} readonly> </p>
+               </h4>
+                <ul class = "list_wrap">
+                    <li>
+                        <div>
+                            <p>첫번째 이미지 제목
+                            <input type="text" size="48px" name="img_title_left" value={{data.img_title_left}}> </p>
+                        </div>
+                        <div class='summer'>
+                            <p>
+                            <textarea name="img_url_left" id="summernote_left" value={{data.img_url_left}}></textarea> </p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <p>두번째 이미지 제목
+                            <input type="text" size="48px" name="img_title_right" value={{data.img_title_right}}> </p>
+                        </div>
+                        <div class='summer'>
+                            <p>
+                            <textarea name="img_url_right" id="summernote_right" value={{data.img_url_right}}></textarea>
+                        </div>
+                    </li>
+                </ul>
+                    <div>
+                        <p> 자유롭게 설명을 적어주세요! </p>
+                        <textarea name="contents"></textarea>
+                    </div>
+                    <div>
+                        <label class="btn" for="write">게임 만들기</label>
+                        <input type="submit" id="write" style="display:none;">
+                    </div>
 
-<body>
-<div class="wrap">
-    <div class="jumbotron jumbotron-fluid">
-    <div class="container">
-
-        <div class="posting-box">
-            <div class="form-group">
-                <input type="email" class="form-control" id="title_left" placeholder="사진 제목">
-            </div>
-            <div class="form-group">
-                <textarea class="form-control" id="content_left" rows="3" placeholder="내용 입력"></textarea>
-            </div>
-
-
-            <div class="form-group">
-                <input type="email" class="form-control" id="title_right" placeholder="사진 제목">
-            </div>
-            <div class="form-group">
-                <textarea class="form-control" id="content_right" rows="3" placeholder="내용 입력"></textarea>
-            </div>
-            <button onclick="posting()" type="button" class="btn btn-primary">저장하기</button>
-        </div>
-    </div>
-</div>
-
-</div>
-</div>
-</body>
-
+            </form>
+        </article>
+    </section>
+    </body>
 </html>
