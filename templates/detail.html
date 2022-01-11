@@ -46,6 +46,18 @@
         })
     }
 
+    function increaseCount(id, selectedTitle, position) {
+        $.ajax({
+            type: "PUT",
+            url: `/api/count/${id}`,
+            data: {position_give: position, title_give: selectedTitle},
+            success: function (response) {
+                alert(response['msg'])
+                window.location.reload();
+            }
+        })
+    }
+
 </script>
 
 <body>
@@ -67,11 +79,11 @@
 {# 본문 #}
 <section>
     <div>
-        <div>
+        <div onclick="increaseCount('{{ post._id }}', '{{ post.img_title_left }}', 'left')">
             {{ post.img_title_left }}
             {{ post.count_left }}명이 선택했어요! ({{ percent_left }}%)
         </div>
-        <div>
+        <div onclick="increaseCount('{{ post._id }}', '{{ post.img_title_right }}', 'right')">
             {{ post.img_title_right }}
             {{ post.count_right }}명이 선택했어요! ({{ percent_right }}%)
         </div>

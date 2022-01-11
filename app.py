@@ -135,5 +135,26 @@ def like_post(id):
     return jsonify({'msg': '좋아요 완료👍'})
 
 
+# [상세 페이지에서 선택한 아이템의 카운트 증가 API]
+@app.route('/api/count/<id>', methods=['PUT'])
+def increase_count(id):
+    position_receive = request.form['position_give']
+    title_receive = request.form['title_give']
+    target_post = db.posts.find_one({'_id': ObjectId(id)})
+
+    # 왼쪽에 있는 아이템을 선택했을 경우, 왼쪽 아이템의 count 값을 하나 증가시킵니다.
+    if position_receive == 'left':
+        current_count_left = target_post['count_left']
+        new_count_left = current_count_left + 1
+        db.posts.update_one({'_id': ObjectId(id)}, {'$set': {'count_left': new_count_left}})
+    # 오른쪽에 있는 아이템을 선택했을 경우, 오른쪽 아이템의 count 값을 하나 증가시킵니다.
+    else:
+        current_count_right = target_post['count_right']
+        new_count_right = current_count_right + 1
+        db.posts.update_one({'_id': ObjectId(id)}, {'$set': {'count_right': new_count_right}})
+
+    return jsonify({'msg': '당신의 선택은 ' + title_receive + '이군요!'})
+
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
