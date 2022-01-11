@@ -1,7 +1,6 @@
 import os
 from random import random
 from string import ascii_uppercase, digits, ascii_lowercase
-
 from bson import ObjectId
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for, flash
 
@@ -19,8 +18,6 @@ from bson.json_util import dumps
 # 비밀번호를 암호화하여 DB에 저장
 import hashlib
 import datetime
-
-
 
 
 @app.route('/')
