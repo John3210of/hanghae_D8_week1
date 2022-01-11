@@ -117,11 +117,22 @@ def add_comment():
     db.comments.insert_one(doc)
     return jsonify({'msg': '코멘트 등록 완료!'})
 
+
 # [상세 페이지 댓글 삭제 API]
 @app.route('/api/comment/<id>', methods=['DELETE'])
 def delete_comment(id):
     db.comments.delete_one({'_id': ObjectId(id)})
     return jsonify({'msg': '코멘트 삭제 완료!'})
+
+
+# [게시글 좋아요 API]
+@app.route('/api/like/<id>', methods=['PUT'])
+def like_post(id):
+    target_post = db.posts.find_one({'_id': ObjectId(id)})
+    current_like = target_post['like']
+    new_like = current_like + 1
+    db.posts.update_one({'_id': ObjectId(id)}, {'$set': {'like': new_like}})
+    return jsonify({'msg': '좋아요 완료👍'})
 
 
 if __name__ == '__main__':
