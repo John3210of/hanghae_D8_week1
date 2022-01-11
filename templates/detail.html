@@ -75,6 +75,18 @@
                 }
             })
         }
+
+        function increaseCount(idx, selectedTitle, position) {
+            $.ajax({
+                type: "PUT",
+                url: `/api/count/${idx}`,
+                data: {position_give: position, title_give: selectedTitle},
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.reload()
+                }
+            })
+        }
     </script>
 </head>
 <body>
