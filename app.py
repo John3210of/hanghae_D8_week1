@@ -1,8 +1,7 @@
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
-from bson import ObjectId
-
 app = Flask(__name__)
 
+from bson import ObjectId
 from pymongo import MongoClient
 
 # client = MongoClient('localhost', 27017)
@@ -127,26 +126,31 @@ def delete_post(idx):
     return jsonify({'msg': ' 게시글이 삭제되었습니다.'})
 
 
-# [회원가입 API]
-# id, pw, name을 받아서, mongoDB에 저장합니다.
-# 저장하기 전에, pw를 sha256 방법(=단방향 암호화. 풀어볼 수 없음)으로 암호화해서 저장합니다.
+# 회원가입 api
 @app.route('/api/regist', methods=['POST'])
 def api_regist():
+    # input 받기
     id_receive = request.form['id_give']
     pw_receive = request.form['pw_give']
     name_receive = request.form['name_give']
-
+    # pw를 암호화
     pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
-
+    # db로 저장
     db.user.insert_one({'id': id_receive, 'pw': pw_hash, 'name': name_receive})
-
     return jsonify({'result': 'success'})
 
+# id 중복확인 api
+@app.route('/api/regist/check_dup', methods=['POST'])
+def check_dup():
+    id_receive = request.form['id_give']
+    #중복 여부에따라 T/F로 return
+    exists = bool(db.user.find_one({"id": id_receive}))
+    return jsonify({'result': 'success', 'exists': exists})
 
-# [로그인 API]
-# id, pw를 받아서 맞춰보고, 토큰을 만들어 발급합니다.
+# 로그인 api
 @app.route('/api/login', methods=['POST'])
 def api_login():
+    # id, pw 받기
     id_receive = request.form['id_give']
     pw_receive = request.form['pw_give']
 
@@ -163,15 +167,12 @@ def api_login():
         payload = {
             'id': id_receive,
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
-
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')  #.decode('utf-8')
         # token을 줍니다.
         return jsonify({'result': 'success', 'token': token})
-    # 찾지 못하면
     else:
         return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
 
-#####
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
