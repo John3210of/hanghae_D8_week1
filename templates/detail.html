@@ -32,6 +32,18 @@
                 }
             })
         }
+
+        function likePost(idx) {
+            $.ajax({
+                type: "PUT",
+                url: `/api/like/${idx}`,
+                data: {},
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.reload()
+                }
+            })
+        }
     </script>
 </head>
 <body>

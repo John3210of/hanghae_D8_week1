@@ -81,6 +81,16 @@ def delete_comment(idx):
     return jsonify({'msg': '코멘트 삭제 완료!'})
 
 
+# 게시글 좋아요
+@app.route('/api/like/<idx>', methods=['PUT'])
+def like_post(idx):
+    target_post = db.posts.find_one({'_id': ObjectId(idx)})
+    current_like = target_post['like']
+    new_like = current_like + 1
+    db.posts.update_one({'_id': ObjectId(idx)}, {'$set': {'like': new_like}})
+    return jsonify({'msg': '좋아요 완료👍'})
+
+
 # [회원가입 API]
 # id, pw, name을 받아서, mongoDB에 저장합니다.
 # 저장하기 전에, pw를 sha256 방법(=단방향 암호화. 풀어볼 수 없음)으로 암호화해서 저장합니다.
