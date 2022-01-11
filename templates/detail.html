@@ -1,8 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>게시글보기</title>
+
+    <!-- JQuery import -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script>
+        function addComment() {
+            const comment = $('#comment').val()
+            $.ajax({
+                type: "POST",
+                url: "/api/comment",
+                data: {comment_give: comment},
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.reload()
+                }
+            })
+        }
+
+        function deleteComment(idx) {
+            $.ajax({
+                type: "DELETE",
+                url: `/api/comment/${idx}`,
+                data: {},
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.reload()
+                }
+            })
+        }
+    </script>
 </head>
 <body>
     {# 헤더 #}
@@ -66,7 +96,7 @@
             <textarea id="comment"></textarea>
             <button type="button" onclick="addComment()">등록하기</button>
         </form>
-    
+
         <h2>댓글({{ comments_count }}개)</h2>
         <ul>
             {% for comment in comments %}

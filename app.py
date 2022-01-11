@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+from bson import ObjectId
 
 app = Flask(__name__)
 
@@ -14,6 +15,8 @@ import jwt
 
 # 비밀번호를 암호화하여 DB에 저장
 import hashlib
+
+import datetime
 
 @app.route('/')
 def list_main():
@@ -55,6 +58,27 @@ def register():
     return render_template('regist.html')
 
 
+# 상세 페이지 댓글 추가
+@app.route('/api/comment', methods=['POST'])
+def add_comment():
+    comment_receive = request.form['comment_give']
+
+    date = datetime.datetime.now()
+    date_string = date.strftime('%Y-%m-%d %H:%M')
+
+    doc = {
+        "contents": comment_receive,
+        "posttime": date_string
+    }
+    db.comments.insert_one(doc)
+    return jsonify({'msg': '코멘트 등록 완료!'})
+
+
+# 상세 페이지 댓글 삭제
+@app.route('/api/comment/<idx>', methods=['DELETE'])
+def delete_comment(idx):
+    db.comments.delete_one({'_id': ObjectId(idx)})
+    return jsonify({'msg': '코멘트 삭제 완료!'})
 
 
 # [회원가입 API]
