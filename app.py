@@ -12,6 +12,11 @@ SECRET_KEY = 'SPARTA'
 import jwt
 from bson.json_util import dumps
 
+# 비밀번호를 암호화하여 DB에 저장
+import hashlib
+
+import datetime
+
 
 @app.route('/')
 def list_main():
@@ -39,30 +44,6 @@ def view_list_like_order():
 def view_list_golden():
     golden_lists = list(db.gameboard.find().sort('date',-1)) # date 역순(최근)
     return jsonify({'all_lists': dumps(golden_lists)}) # object id 사용하기 위해 dumps 사용
-
-
-from flask import Flask, render_template, jsonify, request, session, redirect, url_for
-app = Flask(__name__)
-
-from bson import ObjectId
-from pymongo import MongoClient
-
-# client = MongoClient('localhost', 27017)
-client = MongoClient('mongodb://13.125.81.75', 27017, username="test", password="test")
-db = client.dbsparta_d8
-
-SECRET_KEY = 'SPARTA'
-
-import jwt
-
-# 비밀번호를 암호화하여 DB에 저장
-import hashlib
-
-import datetime
-
-@app.route('/')
-def list_main():
-    return render_template('index.html')
 
 
 @app.route('/post')
