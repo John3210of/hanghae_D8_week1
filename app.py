@@ -57,7 +57,12 @@ def api_regist():
     db.user.insert_one({'id': id_receive, 'pw': pw_hash, 'name': name_receive})
 
     return jsonify({'result': 'success'})
-
+# #id 중복확인 api
+@app.route('/api/regist/check_dup', methods=['POST'])
+def check_dup():
+    id_receive = request.form['id_give']
+    exists = bool(db.user.find_one({"id": id_receive}))
+    return jsonify({'result': 'success', 'exists': exists})
 
 # [로그인 API]
 # id, pw를 받아서 맞춰보고, 토큰을 만들어 발급합니다.
@@ -79,7 +84,7 @@ def api_login():
         payload = {
             'id': id_receive,
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')  #.decode('utf-8')
 
         # token을 줍니다.
         return jsonify({'result': 'success', 'token': token})
@@ -87,7 +92,6 @@ def api_login():
     else:
         return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
 
-#####
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
