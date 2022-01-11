@@ -1,14 +1,15 @@
-import json
-
-from bson.json_util import dumps
-from pymongo import MongoClient
-from flask import Flask, render_template, jsonify
-
-
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 app = Flask(__name__)
+from pymongo import MongoClient
 
-client = MongoClient('mongodb://test:test@13.125.81.75', 27017)
+# client = MongoClient('localhost', 27017)
+client = MongoClient('mongodb://13.125.81.75', 27017, username="test", password="test")
 db = client.dbsparta_d8
+
+SECRET_KEY = 'SPARTA'
+
+import jwt
+from bson.json_util import dumps
 
 
 @app.route('/')
