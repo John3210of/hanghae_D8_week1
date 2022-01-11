@@ -12,12 +12,12 @@
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
     <style>
-        *{
+        *{ /* html 태그 전체를 선택한다는 의미의 태그입니다 */
             list-style: none;
             margin: 0;
             padding: 0;
-            box-sizing: border-box; /* 박스 안에서 값이 조절되도록 해주는 태그 */
-        } /* html 태그 전체를 선택한다는 의미의 태그 */
+            box-sizing: border-box; /* 박스 안에서 값이 조절되도록 해주는 태그입니다 */
+        }
 
         article{
             width: 30%;
@@ -25,6 +25,7 @@
         }
 
         .list_wrap {
+            /* display: flex를 사용하여 한 줄에 업로드 구역이 두개 올라오도록 하였습니다. */
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -47,6 +48,8 @@
             display:none;
         }
         .note-icon-picture::after{
+            /* 기존의 summernote에서 가진 아이콘들을 전부 빼버렸습니다. */
+            /* 그리고 첨부기능과 함께 사진 드래그기능이 가능하여 사용자 편의성을 증대시켰습니다. */
             content:"이미지 첨부";
             display:inline;
             margin-left:10px;
@@ -59,6 +62,7 @@
         }
     </style>
     <script>
+        // summernote를 불러오는 JQuery 입니다. (왼쪽 구역)
         $(document).ready(function() {
           $('#summernote_left').summernote({
                 height: '100%',
@@ -69,6 +73,7 @@
                     link: [],
                     air: []
                 },
+              // callback 함수를 사용하여 이미지를 첨부하는 기능을 다시 끌고왔습니다.
               callbacks: {
                     onImageUpload: function(image) {
                         for(let i = 0; i < image.length; i++)
@@ -77,7 +82,7 @@
               }
           })
         })
-
+        // summernote를 불러오는 JQuery 입니다. (오른쪽 구역)
         $(document).ready(function() {
           $('#summernote_right').summernote({
                 height: '100%',
@@ -97,6 +102,7 @@
           })
         })
 
+        // 이미지 업로드 함수를 Ajax로 구현합니다. (페이지가 새로고침 되지 않도록 비동기화)
         function uploadImage(image) {
             let data = new FormData();
             data.append("image", image)
@@ -120,7 +126,7 @@
     </script>
 
 
-    <title>골라보세요 벨런스게임! : 게임만들기</title>
+    <title>골라보세요 벨런스게임! : 수정하기</title>
 </head>
     <body>
         <article>
@@ -164,6 +170,7 @@
         </article>
     </section>
         <script>
+            // 만약 글 작성 시 공백이 발생한다면 alert 메세지를 띄워 공백 입력을 방지합니다.
         const form = document.querySelector('#edit_form');
             form.addEventListener('submit',(e)=>{
                 const title = document.querySelector('input[name="title"]').value;
