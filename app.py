@@ -1,8 +1,8 @@
-from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+import json
 
-app = Flask(__name__)
-
+from bson.json_util import dumps
 from pymongo import MongoClient
+from flask import Flask, render_template, jsonify, request, session
 
 client = MongoClient('localhost', 27017)
 # client = MongoClient('mongodb://13.125.81.75', 27017, username="test", password="test")
@@ -11,9 +11,12 @@ db = client.dbsparta_d8
 SECRET_KEY = 'SPARTA'
 
 import jwt
+app = Flask(__name__)
 
-# 비밀번호를 암호화하여 DB에 저장
-import hashlib
+client = MongoClient('localhost', 27017)
+db = client.list_db
+# client = MongoClient('mongodb://test:test@localhost', 27017)
+# db = client.list_db
 
 from bson import json_util, ObjectId
 import json
@@ -24,6 +27,37 @@ import datetime
 def list_main():
     return render_template('index.html')
 
+# class Encode(json.JSONEncoder):
+#     def default(self, o):
+#         if isinstance(o, ObjectId):
+#             return str(o)
+#         return json.JSONEncoder.default(self, o)
+
+# 최근 날짜부터 보여주기
+@app.route('/api/list/dateOrder', methods=['GET'])
+def view_list_date_order():
+    all_lists = list(db.goldenBalance.find().sort('date',-1))
+    return jsonify({'all_lists': dumps(all_lists)})
+
+# 좋아요가 많은 순으로 보여주기
+@app.route('/api/list/likeOrder', methods=['GET'])
+def view_list_like_order():
+    all_lists = list(db.goldenBalance.find({}, {'_id': False}).sort('likes',-1))
+    return jsonify({'all_lists': dumps(all_lists)})
+
+# 황금밸런스만 보여주기
+@app.route('/api/list/goldenBalance', methods=['GET'])
+def view_list_golden():
+    golden_lists = list(db.goldenBalance.find().sort('date',-1))
+    # golden_lists = list(db.goldenBalance.find({'$where':"(this.suggestion_right + this.suggersion_left)/(this.suggestion_right - this.suggersion_left)*100 <= 3 "}))
+    # pipeline = [
+    #     {'$group' : {'_id':'$_id', 'balanced':{'$abs':{'$subtract':['$suggestion_left','$suggestion_right']}}}},
+    #     {'$match' : {'balanced' : {'$lte': 3}}}
+    # ]
+    #
+    # golden_lists = list(db.goldenBalance.aggregate(pipeline))
+    # print(golden_lists)
+    return jsonify({'all_lists': dumps(golden_lists)})
 
 @app.route('/post')
 def list_post():
@@ -47,13 +81,11 @@ def list_detail():
     return render_template('detail.html', post=post, percent_left=percent_left, percent_right=percent_right, comments=comments, comments_count=comments_count, is_gold_balance=is_gold_balance)
 
 @app.route('/login')
-def login():
-    msg = request.args.get("msg")
-    return render_template('login.html', msg=msg)
-
+def list_login():
+    return render_template('login.html')
 
 @app.route('/regist')
-def register():
+def list_regist():
     return render_template('regist.html')
 
 
