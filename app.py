@@ -4,8 +4,8 @@ app = Flask(__name__)
 
 from pymongo import MongoClient
 
-# client = MongoClient('localhost', 27017)
-client = MongoClient('mongodb://13.125.81.75', 27017, username="test", password="test")
+client = MongoClient('localhost', 27017)
+# client = MongoClient('mongodb://13.125.81.75', 27017, username="test", password="test")
 db = client.dbsparta_d8
 
 SECRET_KEY = 'SPARTA'
