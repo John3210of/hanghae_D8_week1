@@ -1,8 +1,10 @@
 from pymongo import MongoClient
 from flask import Flask, render_template, jsonify, request, session, url_for, redirect, flash, send_from_directory
+from bson import json_util, ObjectId
 from string import digits, ascii_uppercase, ascii_lowercase
 import random
 import os
+
 
 client = MongoClient('mongodb://13.125.81.75', 27017, username="test", password="test")
 db = client.dbsparta_d8
@@ -11,9 +13,13 @@ SECRET_KEY = 'SPARTA'
 
 app = Flask(__name__)
 
+
+import datetime
+
+
 @app.route('/')
 def list_main():
-    return render_template('index.html')
+    return render_template('post.html')
 
 
 # 이미지를 저장하는 서버경로와 및 저장을 허용하는 확장자를 분류합니다.
@@ -56,17 +62,9 @@ def upload_image():
             return url_for("board_images", filename=filename)
 
 
-# 이미지 파일을 저장해주는 디렉토리가 프로젝트 폴더 외부에 있을 경우,
-# 외부 디렉토리 접근의 권한을 가져오는 함수입니다. (send_from_directory)
-@app.route('/images/<filename>')
-def board_images(filename):
-    return send_from_directory(app.config['BOARD_IMAGE_PATH'], filename)
-
-
 # [게임 작성] (Create)
 @app.route('/post', methods=['GET', 'POST'])
 def list_post():
-    return render_template('post.html')
 
     if request.method == "POST":
         # 사용자의 id를 보내줍니다.
@@ -95,11 +93,10 @@ def list_post():
 
         # mongoDB의 고유 번호(_id)를 주소에 출력합니다.
         # 이는 게시글의 상세페이지 보기와 같으며 게임을 만든 후 상세페이지로 넘겨줍니다.
-        return redirect(url_for('list_main', idx=idx.inserted_id))
+        return redirect(url_for('game_detail', idx=idx.inserted_id))
     else:
         # 아무런 입력이 없이 GET 방식으로 들어왔을때, 게임 작성 페이지로 전환해줍니다.
-        return render_template("index.html")
-
+        return render_template("post.html")
 
 # [게시글 수정] (Update)
 @app.route("/edit", methods=["PATCH"])
@@ -148,7 +145,6 @@ def list_edit():
             flash("글 수정 권한이 없습니다.")
             return redirect(url_for("list_main"))
 
-
 # [게시글 삭제] (Delete)
 @app.route("/api/detail", methods=["DELETE"])
 def game_delete():
@@ -159,6 +155,8 @@ def game_delete():
     else:
         flash("글 삭제 권한이 없습니다.")
     return redirect(url_for("game_lists"))
+
+
 
 
 if __name__ == '__main__':

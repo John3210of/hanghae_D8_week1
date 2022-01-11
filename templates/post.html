@@ -167,18 +167,5 @@
             </form>
         </article>
     </section>
-        <script>
-            // 만약 글 작성 시 공백이 발생한다면 alert 메세지를 띄워 공백 입력을 방지합니다.
-        const form = document.querySelector('#edit_form');
-            form.addEventListener('submit',(e)=>{
-                const title = document.querySelector('input[name="title"]').value;
-                const desc = document.querySelector('.note-editable').innerText;
-                if(title ==''|| desc == ''){
-                e.preventDefault();
-                alert('빈칸을 입력해 주세요')
-                return false;
-                }
-            })
-        </script>
     </body>
 </html>
