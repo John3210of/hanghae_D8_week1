@@ -80,6 +80,9 @@ def list_post():
         # 사진 또는 벨런스게임에 대한 설명을 추가하는 텍스트를 받아옵니다.
         contents = request.form.get("contents")
 
+        now = datetime.now()
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+
         post = {
             "user_id": user_id,
             "img_title_left": img_title_left,
@@ -87,6 +90,9 @@ def list_post():
             "img_url_left": img_url_left,
             "img_url_right": img_url_right,
             "contents": contents,
+            "count_right": 0,
+            "count_left": 0,
+            "date": current_time
         }
 
         idx = db.gameboard.insert_one(post)
