@@ -11,7 +11,7 @@
         $(document).ready(function () {
             // 페이지가 로딩되자마자 게시글의 view를 하나 증가시킵니다.
             // 아래와 같이 사용하면 jinja2 템플릿에서 사용된 값을 JavaScript로 가져올 수 있습니다.
-            increaseView('{{ post._id | safe }}', {{ post.view | safe }})
+            increaseView('{{ post._id | safe }}', {{ post.view | safe }};)
         })
 
         function addComment() {
@@ -26,7 +26,6 @@
                 }
             })
         }
-
         function deleteComment(idx) {
             $.ajax({
                 type: "DELETE",
@@ -38,7 +37,6 @@
                 }
             })
         }
-
         function likePost(idx) {
             $.ajax({
                 type: "PUT",
@@ -50,7 +48,6 @@
                 }
             })
         }
-
         function deletePost(idx) {
             $.ajax({
                 type: "DELETE",
@@ -65,7 +62,6 @@
 
         function increaseView(idx, currentCount) {
             const newCount = currentCount + 1
-
             $.ajax({
                 type: "PUT",
                 url: `/api/view/${idx}`,
@@ -75,7 +71,6 @@
                 }
             })
         }
-
         function increaseCount(idx, selectedTitle, position) {
             $.ajax({
                 type: "PUT",
@@ -90,7 +85,6 @@
     </script>
 </head>
 <body>
-    {# 헤더 #}
     <header>
         <div>
             <h1>
@@ -104,8 +98,7 @@
             <a href="/post">회원가입</a>
         </div>
     </header>
-
-    {# 본문 #}
+   <div> 123456 </div>
     <section>
         <div>
             <div onclick="increaseCount('{{ post._id }}', '{{ post.img_title_left }}', 'left')">
@@ -126,20 +119,16 @@
                 <p>50:50의 비율에 가까운 상태의 게시물을 황금밸런스라고 한답니다! A와 B의 우열을 가릴 수 없는 상태라고 보면 되겠죠?</p>
             </div>
         </h1>
-
         <p>
             {{ post.view }}명이 봤어요
         </p>
-
         <p>
             <button type="button" onclick="likePost('{{ post._id }}')">❤</button>
             {{ post.like }}명이 좋아해요
         </p>
-
         <p>
             {{ post.description }}
         </p>
-
         <a href="/post">수정</a>
         <button type="button" onclick="deletePost('{{ post._id }}')">삭제</button>
         <div>
