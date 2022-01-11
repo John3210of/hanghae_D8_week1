@@ -1,4 +1,7 @@
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+from bson.objectid import ObjectId
+import datetime
+
 app = Flask(__name__)
 
 from bson import ObjectId
@@ -15,7 +18,6 @@ import jwt
 # 비밀번호를 암호화하여 DB에 저장
 import hashlib
 
-import datetime
 
 @app.route('/')
 def list_main():
@@ -32,16 +34,28 @@ def list_post():
 def list_detail():
     idx_receive = request.args.get('idx')
     post = db.posts.find_one({'_id': ObjectId(idx_receive)})
-    percent_left = round((post['count_left'] / (post['count_left'] + post['count_right'])) * 100, 1)
-    percent_right = round((post['count_right'] / (post['count_left'] + post['count_right'])) * 100, 1)
+    count_left = post['count_left']
+    count_right = post['count_right']
 
-    if abs(percent_left - percent_right) < 2:
-        is_gold_balance = True
+    # 만약 두 아이템 모두 선택한 사람이 0명이라면, 각각의 %값을 0으로 할당한다. (ZeroDivisionError 방지)
+    if post['count_left'] == 0 and post['count_right'] == 0:
+        percent_left = 0
+        percent_right = 0
+    # 그렇지 않다면, 각 아이템의 카운트를 두 아이템의 카운트를 더한 값으로 나누고 100을 곱하여 %(선택된 비율)를 구한다.
     else:
+        percent_left = round((count_left / (count_left + count_right)) * 100, 1)
+        percent_right = round((count_right / (count_left + count_right)) * 100, 1)
+
+    # 두 아이템의 % 차이가 2% 이상이거나, 두 아이템 모두 선택한 사람이 0명인 경우에는 황금밸런스가 아니다.
+    # (두 아이템의 % 차이가 2% 미만일 경우에 황금밸런스라고 간주함)
+    if abs(percent_left - percent_right) >= 2 or (count_left == 0 and count_right == 0):
         is_gold_balance = False
+    else:
+        is_gold_balance = True
 
     comments = list(db.comments.find({}))
-    comments_count = len(list(db.comments.find({})))
+    comments_count = len(comments)
+
     return render_template('detail.html', post=post, percent_left=percent_left, percent_right=percent_right,
                            comments=comments, comments_count=comments_count, is_gold_balance=is_gold_balance)
 
@@ -139,13 +153,15 @@ def api_regist():
     db.user.insert_one({'id': id_receive, 'pw': pw_hash, 'name': name_receive})
     return jsonify({'result': 'success'})
 
+
 # id 중복확인 api
 @app.route('/api/regist/check_dup', methods=['POST'])
 def check_dup():
     id_receive = request.form['id_give']
-    #중복 여부에따라 T/F로 return
+    # 중복 여부에따라 T/F로 return
     exists = bool(db.user.find_one({"id": id_receive}))
     return jsonify({'result': 'success', 'exists': exists})
+
 
 # 로그인 api
 @app.route('/api/login', methods=['POST'])
@@ -167,7 +183,7 @@ def api_login():
         payload = {
             'id': id_receive,
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')  #.decode('utf-8')
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')  # .decode('utf-8')
         # token을 줍니다.
         return jsonify({'result': 'success', 'token': token})
     else:
@@ -176,4 +192,3 @@ def api_login():
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
-
