@@ -44,6 +44,18 @@
                 }
             })
         }
+
+        function deletePost(idx) {
+            $.ajax({
+                type: "DELETE",
+                url: `/api/post/${idx}`,
+                data: {},
+                success: function (response) {
+                    alert(response['msg'])
+                    location.href = '/';
+                }
+            })
+        }
     </script>
 </head>
 <body>
