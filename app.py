@@ -164,5 +164,12 @@ def increase_view(id):
     return jsonify({'msg': 'success'})
 
 
+# [게시글 삭제 API]
+@app.route('/api/post/<id>', methods=['DELETE'])
+def delete_post(id):
+    db.posts.delete_one({'_id': ObjectId(id)})
+    return jsonify({'msg': ' 게시글이 삭제되었습니다.'})
+
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)

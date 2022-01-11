@@ -52,6 +52,18 @@
         })
     }
 
+    function deletePost(id) {
+        $.ajax({
+            type: "DELETE",
+            url: `/api/post/${id}`,
+            data: {},
+            success: function (response) {
+                alert(response['msg'])
+                location.href = '/';
+            }
+        })
+    }
+
     function increaseCount(id, selectedTitle, position) {
         $.ajax({
             type: "PUT",
@@ -131,7 +143,7 @@
     </p>
 
     <a href="/post">수정</a>
-    <button type="button">삭제</button>
+    <button type="button" onclick="deletePost('{{ post._id }}')">삭제</button>
     <div>
         <p>정말로 삭제하시겠어요?</p>
     </div>
