@@ -91,6 +91,14 @@ def like_post(idx):
     return jsonify({'msg': '좋아요 완료👍'})
 
 
+# 게시글 조회수 증가
+@app.route('/api/view/<idx>', methods=['PUT'])
+def increase_view(idx):
+    increased_receive = request.form['increased_give']
+    db.posts.update_one({'_id': ObjectId(idx)}, {'$set': {'view': increased_receive}})
+    return jsonify({'msg': 'success'})
+
+
 # 게시글 삭제
 @app.route('/api/post/<idx>', methods=['DELETE'])
 def delete_post(idx):
