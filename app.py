@@ -1,28 +1,63 @@
-from flask import Flask, request, render_template, redirect, jsonify
-from flask import url_for, flash, session, send_from_directory
-from string import digits, ascii_uppercase, ascii_lowercase
-import random
-import os
+import json
 
-app = Flask(__name__)
-
+from bson.json_util import dumps
 from pymongo import MongoClient
+from flask import Flask, render_template, jsonify, request, session
 
-# client = MongoClient('localhost', 27017)
-client = MongoClient('mongodb://13.125.81.75', 27017, username="test", password="test")
+client = MongoClient('localhost', 27017)
+# client = MongoClient('mongodb://13.125.81.75', 27017, username="test", password="test")
 db = client.dbsparta_d8
 
 SECRET_KEY = 'SPARTA'
 
 import jwt
+app = Flask(__name__)
 
-# 비밀번호를 암호화하여 DB에 저장
-import hashlib
+client = MongoClient('localhost', 27017)
+db = client.list_db
+# client = MongoClient('mongodb://test:test@localhost', 27017)
+# db = client.list_db
+
+from bson import json_util, ObjectId
+import json
+
+import datetime
 
 @app.route('/')
 def list_main():
     return render_template('index.html')
 
+# class Encode(json.JSONEncoder):
+#     def default(self, o):
+#         if isinstance(o, ObjectId):
+#             return str(o)
+#         return json.JSONEncoder.default(self, o)
+
+# 최근 날짜부터 보여주기
+@app.route('/api/list/dateOrder', methods=['GET'])
+def view_list_date_order():
+    all_lists = list(db.goldenBalance.find().sort('date',-1))
+    return jsonify({'all_lists': dumps(all_lists)})
+
+# 좋아요가 많은 순으로 보여주기
+@app.route('/api/list/likeOrder', methods=['GET'])
+def view_list_like_order():
+    all_lists = list(db.goldenBalance.find({}, {'_id': False}).sort('likes',-1))
+    return jsonify({'all_lists': dumps(all_lists)})
+
+# 황금밸런스만 보여주기
+@app.route('/api/list/goldenBalance', methods=['GET'])
+def view_list_golden():
+    golden_lists = list(db.goldenBalance.find().sort('date',-1))
+    # golden_lists = list(db.goldenBalance.find({'$where':"(this.suggestion_right + this.suggersion_left)/(this.suggestion_right - this.suggersion_left)*100 <= 3 "}))
+    # pipeline = [
+    #     {'$group' : {'_id':'$_id', 'balanced':{'$abs':{'$subtract':['$suggestion_left','$suggestion_right']}}}},
+    #     {'$match' : {'balanced' : {'$lte': 3}}}
+    # ]
+    #
+    # golden_lists = list(db.goldenBalance.aggregate(pipeline))
+    # print(golden_lists)
+    return jsonify({'all_lists': dumps(golden_lists)})
 
 # 이미지를 저장하는 서버경로와 및 저장을 허용하는 확장자를 분류합니다.
 # 로컬에서는 절대경로로 "/Users/mac_cloud/Desktop/images" 로 지정하여 사용하였습니다.
@@ -73,6 +108,7 @@ def board_images(filename):
 
 @app.route('/post', methods=['GET', 'POST'])
 def list_post():
+    return render_template('post.html')
 
     if request.method == "POST":
         # 사용자의 id를 보내줍니다.
@@ -167,22 +203,30 @@ def game_delete():
     return redirect(url_for("game_lists"))
 
 
+# [상세 페이지 게시글에 관한 데이터 DB에서 받아오기 API]
 @app.route('/detail')
 def list_detail():
-    return render_template('detail.html')
+    id_receive = request.args.get('id')
+    post = db.posts.find_one({'_id': ObjectId(id_receive)})
+    percent_left = round((post['count_left'] / (post['count_left'] + post['count_right'])) * 100, 1)
+    percent_right = round((post['count_right'] / (post['count_left'] + post['count_right'])) * 100, 1)
 
+    if abs(percent_left - percent_right) < 2:
+        is_gold_balance = True
+    else:
+        is_gold_balance = False
+
+    comments = list(db.comments.find({}))
+    comments_count = len(list(db.comments.find({})))
+    return render_template('detail.html', post=post, percent_left=percent_left, percent_right=percent_right, comments=comments, comments_count=comments_count, is_gold_balance=is_gold_balance)
 
 @app.route('/login')
-def login():
-    msg = request.args.get("msg")
-    return render_template('login.html', msg=msg)
-
+def list_login():
+    return render_template('login.html')
 
 @app.route('/regist')
-def register():
+def list_regist():
     return render_template('regist.html')
-
-
 
 
 # [회원가입 API]
@@ -230,7 +274,74 @@ def api_login():
         return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
 
 
+# [상세 페이지 댓글 추가 API]
+@app.route('/api/comment', methods=['POST'])
+def add_comment():
+    comment_receive = request.form['comment_give']
+
+    date = datetime.datetime.now()
+    date_string = date.strftime('%Y-%m-%d %H:%M')
+
+    doc = {
+       "contents": comment_receive,
+       "posttime": date_string
+    }
+    db.comments.insert_one(doc)
+    return jsonify({'msg': '코멘트 등록 완료!'})
+
+
+# [상세 페이지 댓글 삭제 API]
+@app.route('/api/comment/<id>', methods=['DELETE'])
+def delete_comment(id):
+    db.comments.delete_one({'_id': ObjectId(id)})
+    return jsonify({'msg': '코멘트 삭제 완료!'})
+
+
+# [게시글 좋아요 API]
+@app.route('/api/like/<id>', methods=['PUT'])
+def like_post(id):
+    target_post = db.posts.find_one({'_id': ObjectId(id)})
+    current_like = target_post['like']
+    new_like = current_like + 1
+    db.posts.update_one({'_id': ObjectId(id)}, {'$set': {'like': new_like}})
+    return jsonify({'msg': '좋아요 완료👍'})
+
+
+# [상세 페이지에서 선택한 아이템의 카운트 증가 API]
+@app.route('/api/count/<id>', methods=['PUT'])
+def increase_count(id):
+    position_receive = request.form['position_give']
+    title_receive = request.form['title_give']
+    target_post = db.posts.find_one({'_id': ObjectId(id)})
+
+    # 왼쪽에 있는 아이템을 선택했을 경우, 왼쪽 아이템의 count 값을 하나 증가시킵니다.
+    if position_receive == 'left':
+        current_count_left = target_post['count_left']
+        new_count_left = current_count_left + 1
+        db.posts.update_one({'_id': ObjectId(id)}, {'$set': {'count_left': new_count_left}})
+    # 오른쪽에 있는 아이템을 선택했을 경우, 오른쪽 아이템의 count 값을 하나 증가시킵니다.
+    else:
+        current_count_right = target_post['count_right']
+        new_count_right = current_count_right + 1
+        db.posts.update_one({'_id': ObjectId(id)}, {'$set': {'count_right': new_count_right}})
+
+    return jsonify({'msg': '당신의 선택은 ' + title_receive + '이군요!'})
+
+
+# [게시글 조회수 증가 API]
+@app.route('/api/view/<id>', methods=['PUT'])
+def increase_view(id):
+    increased_receive = request.form['increased_give']
+    db.posts.update_one({'_id': ObjectId(id)}, {'$set': {'view': increased_receive}})
+    return jsonify({'msg': 'success'})
+
+
+# [게시글 삭제 API]
+@app.route('/api/post/<id>', methods=['DELETE'])
+def delete_post(id):
+    db.posts.delete_one({'_id': ObjectId(id)})
+    return jsonify({'msg': ' 게시글이 삭제되었습니다.'})
+
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', port=5004, debug=True)
-
+    app.run('0.0.0.0', port=5000, debug=True)
