@@ -5,6 +5,81 @@
     <title>게시글보기</title>
 </head>
 <body>
-<h1>게시글보기 페이지 입니다.</h1>
+    {# 헤더 #}
+    <header>
+        <div>
+            <h1>
+                <img src="" alt="Logo">
+            </h1>
+            <a href="/">모든 밸런스게임 보기</a>
+            <a href="/post">밸런스게임 만들기</a>
+        </div>
+        <div>
+            <a href="/login">로그인</a>
+            <a href="/post">회원가입</a>
+        </div>
+    </header>
+
+    {# 본문 #}
+    <section>
+        <div>
+            <div onclick="increaseCount('{{ post._id }}', '{{ post.img_title_left }}', 'left')">
+                {{ post.img_title_left }}
+                {{ post.count_left }}명이 선택했어요! ({{ percent_left }}%)
+            </div>
+            <div onclick="increaseCount('{{ post._id }}', '{{ post.img_title_right }}', 'right')">
+                {{ post.img_title_right }}
+                {{ post.count_right }}명이 선택했어요! ({{ percent_right }}%)
+            </div>
+        </div>
+        <h1>
+            {{ post.img_title_left }} vs {{ post.img_title_right }}
+            {% if is_gold_balance == True %}
+                <button type="button">황금 밸런스</button>
+            {% endif %}
+            <div>
+                <p>50:50의 비율에 가까운 상태의 게시물을 황금밸런스라고 한답니다! A와 B의 우열을 가릴 수 없는 상태라고 보면 되겠죠?</p>
+            </div>
+        </h1>
+
+        <p>
+            {{ post.view }}명이 봤어요
+        </p>
+
+        <p>
+            <button type="button" onclick="likePost('{{ post._id }}')">❤</button>
+            {{ post.like }}명이 좋아해요
+        </p>
+
+        <p>
+            {{ post.description }}
+        </p>
+
+        <a href="/post">수정</a>
+        <button type="button" onclick="deletePost('{{ post._id }}')">삭제</button>
+        <div>
+            <p>정말로 삭제하시겠어요?</p>
+        </div>
+
+        <form>
+            <label for="comment">의견을 자유롭게 남겨주세요!</label>
+            <textarea id="comment"></textarea>
+            <button type="button" onclick="addComment()">등록하기</button>
+        </form>
+    
+        <h2>댓글({{ comments_count }}개)</h2>
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <span>{{ comment.name }}</span>
+                    <p>
+                        {{ comment.contents }}
+                    </p>
+                    <button type="button">수정</button>
+                    <button type="button" onclick="deleteComment('{{ comment._id }}')">삭제</button>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
 </body>
 </html>
