@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+import time
 from random import random
 from string import ascii_uppercase, digits, ascii_lowercase
 from bson import ObjectId
@@ -238,6 +240,18 @@ def upload_image():
             return url_for("board_images", filename=filename)
 
 
+# current_time(datetime)을 우리가 보는 시간으로 바꿔주는 함수
+@app.template_filter('format_datetime')
+def format_datetime(value):
+    if value is None:
+        return ""  # 만약 시간값이 없다면 공백을 반환
+
+    now_timestamp = time.time()  # offset = utc time과 한국의 time 시차 (+9:00)
+    offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(now_timestamp)
+    value = datetime.fromtimestamp((int(value) / 1000)) + offset
+    return value.strftime('%Y-%m-%d %H:%M:%S')
+
+
 # [게임 작성] (Create)
 @app.route('/post', methods=['GET', 'POST'])
 def list_post():
@@ -246,35 +260,42 @@ def list_post():
         # 글 작성 시 작성자의 이름을 바꿀 수 없도록 readonly 속성을 부여하였습니다.
         user_id = request.form.get("user_id")
         # 벨런스 게임을 진행 할 두 사진의 데이터를 받아옵니다.
-        img_url_left = request.form.get("img_url_left"),
-        img_url_right = request.form.get("img_url_right"),
+        img_full_url_left = request.form.get("img_url_left"),
+        img_full_url_right = request.form.get("img_url_right"),
         # 벨런스 게임을 진행 할 두 사진의 이름을 받아옵니다.
         # 이 사진의 이름은 제목을 자동으로 생성하는 데 사용 될 것입니다.
         img_title_left = request.form.get("img_title_left"),
         img_title_right = request.form.get("img_title_left"),
         # 사진 또는 벨런스게임에 대한 설명을 추가하는 텍스트를 받아옵니다.
         contents = request.form.get("contents")
+        # 게시글이 올라가는 날짜 및 시간을 받아옵니다.
+        # 진자에서 사용 할 때는 작성일 : {{post.pubdate|format_datetime}} 형태로 사용하시면 됩니다 !
+        # current_utc_time = round(datetime.utcnow().timestamp() * 1000)
 
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        img_url_left = str(img_full_url_left).replace('"', ',')
+        thumbnail_left = img_url_left.split(',')
+        img_url_right = str(img_full_url_right).replace('"', ',')
+        thumbnail_right = img_url_right.split(',')
 
         post = {
             "user_id": user_id,
-            "img_title_left": img_title_left,
-            "img_title_right": img_title_right,
-            "img_url_left": img_url_left,
-            "img_url_right": img_url_right,
+            "img_title_left": str(img_title_left),
+            "img_title_right": str(img_title_right),
+            "img_url_left": str(thumbnail_left[1]),
+            "img_url_right": str(thumbnail_right[1]),
             "contents": contents,
             "count_right": 0,
             "count_left": 0,
-            "date": current_time
+            "likes": 0,
+            "views": 0,
+            # "pubdate": current_utc_time
         }
 
         idx = db.gameboard.insert_one(post)
 
         # mongoDB의 고유 번호(_id)를 주소에 출력합니다.
         # 이는 게시글의 상세페이지 보기와 같으며 게임을 만든 후 상세페이지로 넘겨줍니다.
-        return redirect(url_for('game_detail', idx=idx.inserted_id))
+        return redirect(url_for('list_detail', idx=idx.inserted_id))
     else:
         # 아무런 입력이 없이 GET 방식으로 들어왔을때, 게임 작성 페이지로 전환해줍니다.
         return render_template("post.html")
