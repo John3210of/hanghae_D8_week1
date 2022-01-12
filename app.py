@@ -34,6 +34,7 @@ def list_post():
 def list_detail():
     idx_receive = request.args.get('idx')
     post = db.gameboard.find_one({'_id': ObjectId(idx_receive)})
+    post['_id'] = str(post['_id'])
     count_left = post['count_left']
     count_right = post['count_right']
 
@@ -53,7 +54,8 @@ def list_detail():
     else:
         is_gold_balance = True
 
-    comments = list(db.comments.find({}))
+    # 현재 게시글의 id와 현재 게시글에서 보여질 댓글의 postid가 일치하는 댓글들만 받아옴
+    comments = list(db.comments.find({'postid': post['_id']}))
     comments_count = len(comments)
 
     return render_template('detail.html', post=post, percent_left=percent_left, percent_right=percent_right,
@@ -76,6 +78,9 @@ def register():
 def add_comment():
     # 쿠키에 있는 토큰을 받아옴
     token_receive = request.cookies.get('mytoken')
+
+    # 클라이언트로부터 게시글의 아이디를 받아옴
+    post_id_receive = request.form['post_id_give']
     try:
         # 받아온 토큰을 decode하여 payload를 받아옴
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
@@ -90,11 +95,12 @@ def add_comment():
         date = datetime.datetime.now()
         date_string = date.strftime('%Y-%m-%d %H:%M')
 
-        # 가져온 유저의 정보에서 name을 추출해서 DB에 넣어줌(코멘트 내용 & 등록 시간과 함께)
+        # 가져온 유저의 정보에서 name을 추출해서 DB에 넣어줌(코멘트 내용 & 등록 시간 & 게시글의 id과 함께)
         doc = {
             'name': user_info['name'],
             'contents': comment_receive,
-            'posttime': date_string
+            'posttime': date_string,
+            'postid': post_id_receive
         }
         db.comments.insert_one(doc)
         return jsonify({'result': 'success', 'msg': '코멘트 등록 완료!'})

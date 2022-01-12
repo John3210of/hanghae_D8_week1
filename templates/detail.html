@@ -16,12 +16,12 @@
 
         })
 
-        function addComment() {
+        function addComment(postId) {
             const comment = $('#comment').val()
             $.ajax({
                 type: "POST",
                 url: "/api/comment",
-                data: {comment_give: comment},
+                data: {comment_give: comment, post_id_give: postId},
                 success: function (response) {
                     alert(response['msg'])
                     window.location.reload()
@@ -140,7 +140,7 @@
         <form>
             <label for="comment">의견을 자유롭게 남겨주세요!</label>
             <textarea id="comment"></textarea>
-            <button type="button" onclick="addComment()">등록하기</button>
+            <button type="button" onclick="addComment('{{ post._id }}')">등록하기</button>
         </form>
 
         <h2>댓글({{ comments_count }}개)</h2>
