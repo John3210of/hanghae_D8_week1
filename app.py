@@ -12,6 +12,15 @@ SECRET_KEY = 'SPARTA'
 import jwt
 from bson.json_util import dumps
 
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
+
+
+def jsonify(data):
+    return json.loads(json.dumps(data, cls=JSONEncoder))
 
 @app.route('/')
 def list_main():
