@@ -56,11 +56,13 @@
                 data: {},
                 success: function (response) {
                     let lists = JSON.parse(response['all_lists'])               // parser를 쓴 이유는 오브젝트 ID를 사용하기 위해서
-                    // console.log(lists) // 확인 용도
+                    console.log(lists) // 확인 용도
+                    console.log(lists[0]['_id']['$oid'])
                     let temp_html = ``
 
                     for (let i = 0; i < lists.length; i++)
                     {
+                        let idx = lists[i]['_id']['$oid']
                         let img_url_left = lists[i]['img_url_left']             // 왼쪽 이미지 url
                         let img_url_right = lists[i]['img_url_right']           // 오른쪽 이미지 url
                         let count_left = lists[i]['count_left']       // 왼쪽 추천 수
@@ -78,7 +80,7 @@
                         if (i%3 == 0) {
                            temp_html += `<div class="row">
                                             <div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -89,7 +91,7 @@
                         // 끝번
                         else if (i%3 == 2){
                             temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -101,7 +103,7 @@
                         // 2번 또는 column이 늘어나면 자동으로
                         else {
                             temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -127,10 +129,13 @@
                 success: function (response) {
                     let lists = JSON.parse(response['all_lists'])               // objectid 사용하기 위해 parser 사용
                     // console.log(lists)
+                    // console.log(lists[0]['_id']['$oid'])                     // objectid 추출 확인
+
                     let temp_html = ``
 
                     for (let i = 0; i < lists.length; i++)
                     {
+                        let idx = lists[i]['_id']['$oid']
                         let img_url_left = lists[i]['img_url_left']             // 왼쪽 이미지 url
                         let img_url_right = lists[i]['img_url_right']           // 오른쪽 이미지 url
                         let count_left = lists[i]['count_left']       // 왼쪽 추천 수
@@ -148,7 +153,7 @@
                         if (i%3 == 0) {
                             temp_html += `<div class="row">
                                             <div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -159,7 +164,7 @@
                         // 끝번
                         else if (i%3 == 2){
                             temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -171,7 +176,7 @@
                         // 중간 2 ~ 끝번-1
                         else {
                             temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -199,12 +204,15 @@
                 data: {},
                 success: function (response) {
                     let lists = JSON.parse(response['all_lists'])   // parser는 mongodb의 objectID를 사용하기 위해
-                    // console.log(lists)           // console 확인 용도
+                    console.log(lists)           // console 확인 용도
+                    console.log(lists[0]['_id']['$oid'])
+
                     let temp_html = ``
                     let cnt = 0     // for의 i로 하면 황금밸런스가 아닌 게시물은 걸러지기 때문에 cnt로 row 해결
 
                     for (let i = 0; i < lists.length; i++)
                     {
+                        let idx = lists[i]['_id']['$oid']
                         let img_url_left = lists[i]['img_url_left']             // 왼쪽 이미지 url
                         let img_url_right = lists[i]['img_url_right']           // 오른쪽 이미지 url
                         let count_left = lists[i]['count_left']       // 왼쪽 추천 수
@@ -220,7 +228,7 @@
                         if (cnt%3 == 0) {
                             temp_html += `<div class="row">
                                             <div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -231,7 +239,7 @@
                         }
                         else if (cnt%3 == 2){
                             temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -243,7 +251,7 @@
                         }
                         else {
                             temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
+                                                <div class="product-box" onclick="show_detail()" id="${idx}">
                                                     <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                                     background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                                     <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -266,14 +274,15 @@
         // param을 모두 넘겨주느냐, objectID만 넘겨서 다시 find_one 하느냐 고민을 해야겠다
         // 넘겨줘야 하는 param 목록
         // objectID : 게시물을 수정할 수도 있으니 같이 넘겨준다
-        function show_detail() {
-            alert("show detail!")
+        function show_detail(idx) {
+            // alert("ObjectID : " + idx)
             $.ajax({
                 type:"GET",
-                url:"/detail",
+                url:"/detail?idx=" + idx,
                 data:{},
+                // data:{idx_give:idx},
                 success: function (response){
-                    // location.href = "api/detail.html"
+                    console.log("success")
                 }
             })
         }
@@ -297,13 +306,13 @@
                             <a class="nav-link active" aria-current="page" href="/">모든 게임 보기</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="/post" tabindex="-1">밸런스 게임 만들기</a>
+                            <a class="nav-link active" href="/post">밸런스 게임 만들기</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active" href="/login">로그인</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="/regist" tabindex="-1">회원 가입</a>
+                            <a class="nav-link active" href="/regist">회원 가입</a>
                         </li>
                     </ul>
                 </div>
@@ -312,7 +321,7 @@
     </div>
 
 
-    <div>
+    <div style="padding-top: 10px">
         <button type="button" onclick="showList_dateOrder()" class="btn btn-primary">최신순</button>
         <button type="button" onclick="showList_likeOrder()" class="btn btn-primary">인기순</button>
         <button type="button" onclick="showList_goldenBalance()" class="btn btn-warning">황금밸런스만 보기</button>
@@ -324,13 +333,13 @@
 
     <script>
         let lists = JSON.parse({{ items | tojson | safe }})
-        console.log(lists)
 
         for (let i = 0; i < lists.length; i++) {
             let temp_html = ``
 
             for (let i = 0; i < lists.length; i++)
             {
+                let idx = lists[i]['_id']['$oid']
                 let img_url_left = lists[i]['img_url_left']             // 왼쪽 이미지 url
                 let img_url_right = lists[i]['img_url_right']           // 오른쪽 이미지 url
                 let count_left = lists[i]['count_left']       // 왼쪽 추천 수
@@ -338,7 +347,6 @@
                 let likes = lists[i]['likes']                           // 해당 게시물의 좋아요 수
                 let views = lists[i]['views']                           // 해당 게시물의 조회 수
                 let golden = false                                      // 황금 밸런스 여부. 밑에서 계산
-                console.log(img_url_left, img_url_right)
 
                 // 황금 밸런스라면 주변에 황금 테두리를 보여주기 위해 계산. 비율은 47:53까지
                 if ((count_right + count_left != 0) && (Math.abs(count_left-count_right)/(count_left+count_right)*100 <= 3))
@@ -349,7 +357,7 @@
                 if (i%3 == 0) {
                    temp_html += `<div class="row">
                                     <div class="col">
-                                        <div class="product-box" onclick="show_detail()">
+                                        <div class="product-box" onclick="show_detail('${idx}')" id="${idx}">
                                             <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                             background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                             <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -360,7 +368,7 @@
                 // 끝번
                 else if (i%3 == 2){
                     temp_html += `<div class="col">
-                                        <div class="product-box" onclick="show_detail()">
+                                        <div class="product-box" onclick="show_detail('${idx}')" id="${idx}">
                                             <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                             background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                             <div style="width:50%; height:150px; background-image: url('${img_url_right}');
@@ -372,7 +380,7 @@
                 // 2번 또는 column이 늘어나면 자동으로
                 else {
                     temp_html += `<div class="col">
-                                        <div class="product-box" onclick="show_detail()">
+                                        <div class="product-box" onclick="show_detail('${idx}')" id="${idx}">
                                             <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
                                             background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
                                             <div style="width:50%; height:150px; background-image: url('${img_url_right}');
