@@ -11,7 +11,7 @@
         $(document).ready(function () {
             // 페이지가 로딩되자마자 게시글의 view를 하나 증가시킵니다.
             // 아래와 같이 사용하면 jinja2 템플릿에서 사용된 값을 JavaScript로 가져올 수 있습니다.
-            increaseView('{{ post._id | safe }}', {{ post.view | safe }})
+            increaseView('{{ post._id | safe }}', {{ post.views | safe }})
         })
 
         function addComment() {
@@ -108,14 +108,14 @@
     {# 본문 #}
     <section>
         <div>
-            <div onclick="increaseCount('{{ post._id }}', '{{ post.img_title_left }}', 'left')">
+            <img src="{{ post.img_url_left }}" onclick="increaseCount('{{ post._id }}', '{{ post.img_title_left }}', 'left')">
                 {{ post.img_title_left }}
                 {{ post.count_left }}명이 선택했어요! ({{ percent_left }}%)
-            </div>
-            <div onclick="increaseCount('{{ post._id }}', '{{ post.img_title_right }}', 'right')">
+            </img>
+            <img src="{{ post.img_url_right }}" onclick="increaseCount('{{ post._id }}', '{{ post.img_title_right }}', 'right')">
                 {{ post.img_title_right }}
                 {{ post.count_right }}명이 선택했어요! ({{ percent_right }}%)
-            </div>
+            </img>
         </div>
         <h1>
             {{ post.img_title_left }} vs {{ post.img_title_right }}
@@ -128,16 +128,16 @@
         </h1>
 
         <p>
-            {{ post.view }}명이 봤어요
+            {{ post.views }}명이 봤어요
         </p>
 
         <p>
             <button type="button" onclick="likePost('{{ post._id }}')">❤</button>
-            {{ post.like }}명이 좋아해요
+            {{ post.likes }}명이 좋아해요
         </p>
 
         <p>
-            {{ post.description }}
+            {{ post.contents }}
         </p>
 
         <a href="/post">수정</a>

@@ -33,7 +33,7 @@ def list_post():
 @app.route('/detail')
 def list_detail():
     idx_receive = request.args.get('idx')
-    post = db.posts.find_one({'_id': ObjectId(idx_receive)})
+    post = db.gameboard.find_one({'_id': ObjectId(idx_receive)})
     count_left = post['count_left']
     count_right = post['count_right']
 
@@ -99,18 +99,18 @@ def delete_comment(idx):
 def increase_count(idx):
     position_receive = request.form['position_give']
     title_receive = request.form['title_give']
-    target_post = db.posts.find_one({'_id': ObjectId(idx)})
+    target_post = db.gameboard.find_one({'_id': ObjectId(idx)})
 
     # 왼쪽에 있는 아이템을 선택했을 경우, 왼쪽 아이템의 count 값을 하나 증가시킵니다.
     if position_receive == 'left':
         current_count_left = target_post['count_left']
         new_count_left = current_count_left + 1
-        db.posts.update_one({'_id': ObjectId(idx)}, {'$set': {'count_left': new_count_left}})
+        db.gameboard.update_one({'_id': ObjectId(idx)}, {'$set': {'count_left': new_count_left}})
     # 오른쪽에 있는 아이템을 선택했을 경우, 오른쪽 아이템의 count 값을 하나 증가시킵니다.
     else:
         current_count_right = target_post['count_right']
         new_count_right = current_count_right + 1
-        db.posts.update_one({'_id': ObjectId(idx)}, {'$set': {'count_right': new_count_right}})
+        db.gameboard.update_one({'_id': ObjectId(idx)}, {'$set': {'count_right': new_count_right}})
 
     return jsonify({'msg': '당신의 선택은 ' + title_receive + '이군요!'})
 
@@ -118,10 +118,10 @@ def increase_count(idx):
 # 게시글 좋아요
 @app.route('/api/like/<idx>', methods=['PUT'])
 def like_post(idx):
-    target_post = db.posts.find_one({'_id': ObjectId(idx)})
-    current_like = target_post['like']
+    target_post = db.gameboard.find_one({'_id': ObjectId(idx)})
+    current_like = target_post['likes']
     new_like = current_like + 1
-    db.posts.update_one({'_id': ObjectId(idx)}, {'$set': {'like': new_like}})
+    db.gameboard.update_one({'_id': ObjectId(idx)}, {'$set': {'likes': new_like}})
     return jsonify({'msg': '좋아요 완료👍'})
 
 
@@ -129,14 +129,14 @@ def like_post(idx):
 @app.route('/api/view/<idx>', methods=['PUT'])
 def increase_view(idx):
     increased_receive = request.form['increased_give']
-    db.posts.update_one({'_id': ObjectId(idx)}, {'$set': {'view': increased_receive}})
+    db.gameboard.update_one({'_id': ObjectId(idx)}, {'$set': {'views': increased_receive}})
     return jsonify({'msg': 'success'})
 
 
 # 게시글 삭제
 @app.route('/api/post/<idx>', methods=['DELETE'])
 def delete_post(idx):
-    db.posts.delete_one({'_id': ObjectId(idx)})
+    db.gameboard.delete_one({'_id': ObjectId(idx)})
     return jsonify({'msg': ' 게시글이 삭제되었습니다.'})
 
 
