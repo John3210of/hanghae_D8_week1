@@ -29,7 +29,7 @@ def list_post():
     return render_template('post.html')
 
 
-# 상세 페이지 게시글에 관한 데이터 DB에서 받아오기
+# 상세 페이지 게시글에 관한 데이터 DB에서 받아오기 (코멘트도 포함)
 @app.route('/detail')
 def list_detail():
     idx_receive = request.args.get('idx')
@@ -74,17 +74,32 @@ def register():
 # 상세 페이지 댓글 추가
 @app.route('/api/comment', methods=['POST'])
 def add_comment():
-    comment_receive = request.form['comment_give']
+    # 쿠키에 있는 토큰을 받아옴
+    token_receive = request.cookies.get('mytoken')
+    try:
+        # 받아온 토큰을 decode하여 payload를 받아옴
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
 
-    date = datetime.datetime.now()
-    date_string = date.strftime('%Y-%m-%d %H:%M')
+        # payload에 있는 id와 DB에 있는 id를 비교하여 일치하는 유저의 정보를 DB에서 가져옴
+        user_info = db.user.find_one({'id': payload['id']})
 
-    doc = {
-        "contents": comment_receive,
-        "posttime": date_string
-    }
-    db.comments.insert_one(doc)
-    return jsonify({'msg': '코멘트 등록 완료!'})
+        # 클라이언트로부터 받아온 코멘트를 comment_receive 변수에 넣음
+        comment_receive = request.form['comment_give']
+
+        # 현재 날짜(=등록 시간)를 생성하여 원하는 포맷으로 변경하여 date_string 변수에 넣음
+        date = datetime.datetime.now()
+        date_string = date.strftime('%Y-%m-%d %H:%M')
+
+        # 가져온 유저의 정보에서 name을 추출해서 DB에 넣어줌(코멘트 내용 & 등록 시간과 함께)
+        doc = {
+            'name': user_info['name'],
+            'contents': comment_receive,
+            'posttime': date_string
+        }
+        db.comments.insert_one(doc)
+        return jsonify({'result': 'success', 'msg': '코멘트 등록 완료!'})
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for('list_main'))
 
 
 # 상세 페이지 댓글 삭제
