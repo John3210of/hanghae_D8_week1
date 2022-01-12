@@ -25,6 +25,7 @@
         }
 
         .list_wrap {
+            /* display: flex를 사용하여 한 줄에 업로드 구역이 두개 올라오도록 하였습니다. */
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -47,6 +48,8 @@
             display:none;
         }
         .note-icon-picture::after{
+            /* 기존의 summernote에서 가진 아이콘들을 전부 빼버렸습니다. */
+            /* 그리고 첨부기능과 함께 사진 드래그기능이 가능하여 사용자 편의성을 증대시켰습니다. */
             content:"이미지 첨부";
             display:inline;
             margin-left:10px;
@@ -79,7 +82,6 @@
               }
           })
         })
-
         // summernote를 불러오는 JQuery 입니다. (오른쪽 구역)
         $(document).ready(function() {
           $('#summernote_right').summernote({
@@ -124,7 +126,7 @@
     </script>
 
 
-    <title>골라보세요 벨런스게임! : 게임만들기</title>
+    <title>골라보세요 벨런스게임! : 수정하기</title>
 </head>
     <body>
         <article>
@@ -137,21 +139,21 @@
                     <li>
                         <div>
                             <p>첫번째 이미지 제목
-                            <input type="text" size="48px" name="img_title_left"> </p>
+                            <input type="text" size="48px" name="img_title_left" value={{data.img_title_left}}> </p>
                         </div>
                         <div class='summer'>
                             <p>
-                            <textarea name="img_url_left" id="summernote_left"></textarea> </p>
+                            <textarea name="img_url_left" id="summernote_left" value={{data.img_url_left}></textarea> </p>
                         </div>
                     </li>
                     <li>
                         <div>
                             <p>두번째 이미지 제목
-                            <input type="text" size="48px" name="img_title_right"> </p>
+                            <input type="text" size="48px" name="img_title_right" value={{data.img_title_right}}> </p>
                         </div>
                         <div class='summer'>
                             <p>
-                            <textarea name="img_url_right" id="summernote_right"></textarea>
+                            <textarea name="img_url_right" id="summernote_right" value={{img_url_right}}></textarea>
                         </div>
                     </li>
                 </ul>
