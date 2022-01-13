@@ -1,0 +1,25 @@
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 20px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left .btn-view-all {
+    margin-right: 4px;
+}
+
+.logo {
+    display: inline;
+    margin-right: 14px;
+}
+
+.logo a img {
+    width: 80px;
+}

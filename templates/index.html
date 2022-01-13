@@ -6,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
             integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
             crossorigin="anonymous"></script>
@@ -19,23 +21,69 @@
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
 
+    <!-- Google font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome kit-->
+    <script src="https://kit.fontawesome.com/8e4d30a929.js" crossorigin="anonymous"></script>
+
+    <!-- Link Style Sheet -->
+    <link rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/footer.css">
+
     <title>골라보세요 밸런스 게임!</title>
+
+    <!--    og tag-->
+    <meta property="og:title" content="골라보세요, 밸런스 게임!"/>
+    <meta property="og:description" content="50:50의 비율에 가까운 상태의 게시물을 황금밸런스라고 한답니다! A와 B의 우열을 가릴 수 없는 상태라고 보면 되겠죠?"/>
+    <meta property="og:image" content="{{ url_for('static', filename='gb-mark.png') }}"/>
 
     <meta property="og:title" content="황금밸런스"/>
     <meta property="og:description" content="황금 밸런스를 찾아서"/>
     <meta property="og:image" content="{{ url_for('static', filename='url_docs_og.png') }}"/>
 
     <style>
-        .product-box {
-            min-width: 260px;
-            max-width: 260px;
-
-            background-color: green;
-            border-radius: 10px;
-            margin-top: 20px;
-            margin-left: 10px;
+        * {
+            font-family: 'Noto Sans KR', sans-serif;
         }
 
+        .golden-product-box {
+            max-width: 260px;
+
+            background-color: darkgray;
+            /*border-radius: 10px;*/
+            margin-top: 20px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+
+            border-style: solid;
+            border-width: 3px;
+            border-color: gold;
+
+            text-align: right;
+            vertical-align: bottom;
+        }
+
+        .product-box {
+            max-width: 260px;
+
+            background-color: darkgray;
+            margin-top: 20px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+
+            text-align: right;
+            vertical-align: bottom;
+        }
+
+
+        .ellipsis {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
     </style>
 
@@ -43,7 +91,6 @@
         // 처음에 페이지 로딩이 끝나면 default로 최근 것부터 보여준다
         $(document).ready(function () {
             $('[data-toggle="popover"]').popover(); // popover용도
-            //showList_dateOrder()
         });
 
         // 로고를 클릭하거나, 모든 게임 보기를 누르면 default로 최근 것부터 보여준다.
@@ -55,60 +102,80 @@
                 success: function (response) {
                     let lists = JSON.parse(response['all_lists'])               // parser를 쓴 이유는 오브젝트 ID를 사용하기 위해서
                     // console.log(lists) // 확인 용도
-                    let temp_html = ``
+                    // console.log(lists[0]['_id']['$oid'])
 
-                    for (let i = 0; i < lists.length; i++)
-                    {
+                    let temp_html = `<div class="row">`
+
+                    for (let i = 0; i < lists.length; i++) {
+                        let idx = lists[i]['_id']['$oid']
                         let img_url_left = lists[i]['img_url_left']             // 왼쪽 이미지 url
                         let img_url_right = lists[i]['img_url_right']           // 오른쪽 이미지 url
-                        let count_left = lists[i]['count_left']       // 왼쪽 추천 수
-                        let count_right = lists[i]['count_right']     // 오른쪽 추천 수
+                        let img_title_left = lists[i]['img_title_left']         // 왼쪽 이미지 제목
+                        let img_title_right = lists[i]['img_title_right']         // 오른쪽 이미지 제목
+                        let count_left = lists[i]['count_left']                 // 왼쪽 추천 수
+                        let count_right = lists[i]['count_right']               // 오른쪽 추천 수
                         let likes = lists[i]['likes']                           // 해당 게시물의 좋아요 수
                         let views = lists[i]['views']                           // 해당 게시물의 조회 수
                         let golden = false                                      // 황금 밸런스 여부. 밑에서 계산
 
                         // 황금 밸런스라면 주변에 황금 테두리를 보여주기 위해 계산. 비율은 47:53까지
-                        if ((count_right + count_left != 0) && (Math.abs(count_left-count_right)/(count_left+count_right)*100 <= 3))
+                        if ((count_right + count_left != 0) && (Math.abs(count_left - count_right) / (count_left + count_right) * 100 <= 3))
                             golden = true
 
-                        // 지금 1row당 3개씩 보여주고 있기 때문에 html태그가 약간 다름
-                        // 처음
-                        if (i%3 == 0) {
-                           temp_html += `<div class="row">
-                                            <div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                            </div>`
-                        }
-                        // 끝번
-                        else if (i%3 == 2){
-                            temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                            </div>
-                                         </div>`
-                        }
-                        // 2번 또는 column이 늘어나면 자동으로
-                        else {
-                            temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                         </div>`
+                        if (golden) {
+                            temp_html += `<div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="golden-product-box" onclick="show_detail('${idx}')" id="${idx}">
+                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
+                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
+                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
+                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"></div>
+                                    <div style="float: left;"
+                                    <div class="row">
+                                        <div class="col-8 ellipsis" style="text-align: left;">
+                                            <label style="display: block; width:195px;">
+                                                <span style="font-size: 12px;">
+                                                    ${img_title_left} vs ${img_title_right}
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="col-4" style="text-align: right;">
+                                            <span style="font-size: 12px">
+                                                <span style="color: red"><i class="fas fa-heart"></i></span>${likes}
+                                                <i class="far fa-eye"></i>${views}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+                        } else {
+                            temp_html += `<div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="product-box" onclick="show_detail('${idx}')" id="${idx}">
+                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
+                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
+                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
+                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"></div>
+                                    <div style="float: left;"
+                                    <div class="row">
+                                        <div class="col-8 ellipsis" style="text-align: left;">
+                                            <label style="display: block; width:195px;">
+                                                <span style="font-size: 12px;">
+                                                    ${img_title_left} vs ${img_title_right}
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="col-4" style="text-align: right;">
+                                            <span style="font-size: 12px">
+                                                <span style="color: red"><i class="fas fa-heart"></i></span>${likes}
+                                                <i class="far fa-eye"></i>${views}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
                         }
                     }
 
+                    temp_html += `</div>`
                     // 해당 컨테이너를 한 번 비우고 html을 붙임. 최근 30개정도 보여주면 될것 같은데 무한스크롤?
                     $('#container').empty()
                     $('#container').append(temp_html)
@@ -117,7 +184,7 @@
         }
 
         // 좋아요가 많은 순서대로 find한 데이터를 가공
-        function showList_likeOrder(){
+        function showList_likeOrder() {
             $.ajax({
                 type: "GET",
                 url: "api/list/likeOrder",
@@ -125,60 +192,82 @@
                 success: function (response) {
                     let lists = JSON.parse(response['all_lists'])               // objectid 사용하기 위해 parser 사용
                     // console.log(lists)
-                    let temp_html = ``
+                    // console.log(lists[0]['_id']['$oid'])                     // objectid 추출 확인
 
-                    for (let i = 0; i < lists.length; i++)
-                    {
+                    let temp_html = `<div class="row">`
+
+                    for (let i = 0; i < lists.length; i++) {
+                        let idx = lists[i]['_id']['$oid']
                         let img_url_left = lists[i]['img_url_left']             // 왼쪽 이미지 url
                         let img_url_right = lists[i]['img_url_right']           // 오른쪽 이미지 url
-                        let count_left = lists[i]['count_left']       // 왼쪽 추천 수
-                        let count_right = lists[i]['count_right']     // 오른쪽 추천 수
+                        let img_title_left = lists[i]['img_title_left']         // 왼쪽 이미지 제목
+                        let img_title_right = lists[i]['img_title_right']         // 오른쪽 이미지 제목
+                        let count_left = lists[i]['count_left']                 // 왼쪽 추천 수
+                        let count_right = lists[i]['count_right']               // 오른쪽 추천 수
                         let likes = lists[i]['likes']                           // 해당 게시물의 좋아요 수
                         let views = lists[i]['views']                           // 해당 게시물의 조회 수
                         let golden = false                                      // 황금 밸런스 여부. 밑에서 계산
 
                         // 0으로 나누면 안되기 때문에 먼저 검사하고 비율 검사 최대 47:53까지
-                        if ((count_right + count_left != 0) && (Math.abs(count_left-count_right)/(count_left+count_right)*100 <= 3))
+                        if ((count_right + count_left != 0) && (Math.abs(count_left - count_right) / (count_left + count_right) * 100 <= 3))
                             golden = true
 
-                        // golden == true면 황금색 테두리
-                        // 첫번째
-                        if (i%3 == 0) {
-                            temp_html += `<div class="row">
-                                            <div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                            </div>`
+                        if (golden) {
+                            temp_html += `<div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="golden-product-box" onclick="show_detail('${idx}')" id="${idx}">
+                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
+                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
+                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
+                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"></div>
+                                    <div style="float: left;"
+                                    <div class="row">
+                                        <div class="col-8 ellipsis" style="text-align: left;">
+                                            <label style="display: block; width:195px;">
+                                                <span style="font-size: 12px;">
+                                                    ${img_title_left} vs ${img_title_right}
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="col-4" style="text-align: right;">
+                                            <span style="font-size: 12px">
+                                                <span style="color: red"><i class="fas fa-heart"></i></span>${likes}
+                                                <i class="far fa-eye"></i>${views}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+                        } else {
+                            temp_html += `<div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="product-box" onclick="show_detail('${idx}')" id="${idx}">
+                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
+                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
+                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
+                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"></div>
+                                    <div style="float: left;"
+                                    <div class="row">
+                                        <div class="col-8 ellipsis" style="text-align: left;">
+                                            <label style="display: block; width:195px;">
+                                                <span style="font-size: 12px;">
+                                                    ${img_title_left} vs ${img_title_right}
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="col-4" style="text-align: right;">
+                                            <span style="font-size: 12px">
+                                                <span style="color: red"><i class="fas fa-heart"></i></span>${likes}
+                                                <i class="far fa-eye"></i>${views}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
                         }
-                        // 끝번
-                        else if (i%3 == 2){
-                            temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                            </div>
-                                         </div>`
-                        }
-                        // 중간 2 ~ 끝번-1
-                        else {
-                            temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                         </div>`
-                        }
+
+
                     }
 
+                    temp_html += `</div>`
                     // window.location.reload()를 사용하려 했지만 무한 페이지 갱신되는 현상때문에
                     // empty로 사용
                     $('#container').empty()
@@ -190,68 +279,62 @@
         // 황금밸런스 게시물만 보여주는 용도
         // app.py에서 db.aggregate로 계산해서 가져오는게 좋겠지만, 지금 쿼리문 작성에 애로사항이 있음
         // 대충 {'$abs':{'$subtract':['count_left','count_right']}}....
-        function showList_goldenBalance(){
+        function showList_goldenBalance() {
             $.ajax({
                 type: "GET",
                 url: "api/list/goldenBalance",
                 data: {},
                 success: function (response) {
                     let lists = JSON.parse(response['all_lists'])   // parser는 mongodb의 objectID를 사용하기 위해
-                    // console.log(lists)           // console 확인 용도
-                    let temp_html = ``
+                    console.log(lists)           // console 확인 용도
+                    console.log(lists[0]['_id']['$oid'])
+
+                    let temp_html = `<div class=row>`
                     let cnt = 0     // for의 i로 하면 황금밸런스가 아닌 게시물은 걸러지기 때문에 cnt로 row 해결
 
-                    for (let i = 0; i < lists.length; i++)
-                    {
+                    for (let i = 0; i < lists.length; i++) {
+                        let idx = lists[i]['_id']['$oid']
                         let img_url_left = lists[i]['img_url_left']             // 왼쪽 이미지 url
                         let img_url_right = lists[i]['img_url_right']           // 오른쪽 이미지 url
-                        let count_left = lists[i]['count_left']       // 왼쪽 추천 수
-                        let count_right = lists[i]['count_right']     // 오른쪽 추천 수
-                        let likes = lists[i]['likes']                           // 해당 게시물 좋아요 수
-                        let views = lists[i]['views']                           // 해당 게시물 조회 수
+                        let img_title_left = lists[i]['img_title_left']         // 왼쪽 이미지 제목
+                        let img_title_right = lists[i]['img_title_right']         // 오른쪽 이미지 제목
+                        let count_left = lists[i]['count_left']                 // 왼쪽 추천 수
+                        let count_right = lists[i]['count_right']               // 오른쪽 추천 수
+                        let likes = lists[i]['likes']                           // 해당 게시물의 좋아요 수
+                        let views = lists[i]['views']                           // 해당 게시물의 조회 수
+                        let golden = false                                      // 황금 밸런스 여부. 밑에서 계산
 
                         // 지금은 여기서 황금 밸런스 게시물을 걸러내고 있는데, mongodb에서 처리하는게 더 좋아보임
-                        if ((count_right + count_left == 0) || (Math.abs(count_left-count_right)/(count_left+count_right)*100 > 3))
+                        if ((count_right + count_left == 0) || (Math.abs(count_left - count_right) / (count_left + count_right) * 100 > 3))
                             continue
 
-                        // border gold 추가해야함
-                        if (cnt%3 == 0) {
-                            temp_html += `<div class="row">
-                                            <div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                            </div>`
-                            cnt++
-                        }
-                        else if (cnt%3 == 2){
-                            temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                            </div>
-                                         </div>`
-                            cnt++
-                        }
-                        else {
-                            temp_html += `<div class="col">
-                                                <div class="product-box" onclick="show_detail()">
-                                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
-                                                </div>
-                                         </div>`
-                            cnt++
-                        }
+                        temp_html += `<div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="golden-product-box" onclick="show_detail('${idx}')" id="${idx}">
+                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
+                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
+                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
+                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"></div>
+                                    <div style="float: left;"
+                                    <div class="row">
+                                        <div class="col-8 ellipsis" style="text-align: left;">
+                                            <label style="display: block; width:195px;">
+                                                <span style="font-size: 12px;">
+                                                    ${img_title_left} vs ${img_title_right}
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="col-4" style="text-align: right;">
+                                            <span style="font-size: 12px">
+                                                <span style="color: red"><i class="fas fa-heart"></i></span>${likes}
+                                                <i class="far fa-eye"></i>${views}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
                     }
 
+                    temp_html += `</div>`
                     // window.location.reload() 대신 컨테이너 비우고 붙임
                     // container.delete하면 사라져버림
                     $('#container').empty()
@@ -264,126 +347,159 @@
         // param을 모두 넘겨주느냐, objectID만 넘겨서 다시 find_one 하느냐 고민을 해야겠다
         // 넘겨줘야 하는 param 목록
         // objectID : 게시물을 수정할 수도 있으니 같이 넘겨준다
-        function show_detail() {
-            alert("show detail!")
-            $.ajax({
-                type:"GET",
-                url:"/detail",
-                data:{},
-                success: function (response){
-                    // location.href = "api/detail.html"
-                }
-            })
+        function show_detail(idx) {
+            console.log(idx)
+            location.href = "/detail?idx=" + idx
         }
+
+        function logout() {
+            $.removeCookie('token', {path: '/'});
+            alert('로그아웃!')
+            window.location.href = "/"
+        };
+
     </script>
 
 </head>
 <body>
-    <div>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="/">
-                    <img src="/static/icon.jpg"  alt="황금밸런스!" width="30px" height="30px">
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/">모든 게임 보기</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/post" tabindex="-1">밸런스 게임 만들기</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/login">로그인</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/regist" tabindex="-1">회원 가입</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+<header class="header">
+    <div class="header-left">
+        <h1 class="logo">
+            <a href="/">
+                <img src="/static/logo2.svg" alt="Logo">
+            </a>
+        </h1>
+        <a class="btn btn-light btn-view-all" href="/" role="button">모든 밸런스게임 보기</a>
+        <a class="btn btn-light" href="/post" role="button">밸런스게임 만들기</a>
     </div>
+    <div class="header-right">
+        {% if login_status %}
+        <button class="btn btn-light" onclick="logout()" type="button">로그아웃</button>
+        {% else %}
+        <a class="btn btn-light" href="/login" role="button">로그인</a>
+        <a class="btn btn-light" href="/regist" role="button">회원가입</a>
+        {% endif %}
+    </div>
+</header>
+<section>
+    <div class="container">
+        <div class="btn-group" style="margin : 10px 0px 0px 10px" role="group" aria-label="필터 종류">
+            <input type="radio" onclick="showList_dateOrder()" class="btn-check" name="btnradio" id="btnradio1"
+                   autocomplete="off" checked>
+            <label class="btn btn-outline-secondary" for="btnradio1">최신</label>
 
+            <input type="radio" onclick="showList_likeOrder()" class="btn-check" name="btnradio" id="btnradio2"
+                   autocomplete="off">
+            <label class="btn btn-outline-secondary" for="btnradio2">인기</label>
 
-    <div>
-        <button type="button" onclick="showList_dateOrder()" class="btn btn-primary">최신순</button>
-        <button type="button" onclick="showList_likeOrder()" class="btn btn-primary">인기순</button>
-        <button type="button" onclick="showList_goldenBalance()" class="btn btn-warning">황금밸런스만 보기</button>
-        <button type="button" class="btn btn-warning" title="황금밸런스란?" data-toggle="popover" data-placement="bottom"  data-content="50:50의 비율에 가까운 상태의 게시물을 황금밸런스라고 한답니다! A와 B의 우열을 가릴 수 없는 상태라고 보면 되겠죠?">황금밸런스란?</button>
+            <input type="radio" onclick="showList_goldenBalance()" class="btn-check" name="btnradio" id="btnradio3"
+                   autocomplete="off">
+            <label class="btn btn-outline-warning" for="btnradio3">황!밸</label>
+        </div>
+
+        <button type="button" class="btn btn-warning justify-content-end" style="margin-top: 10px" title="황금밸런스란?"
+                data-toggle="popover" data-placement="bottom"
+                data-content="50:50의 비율에 가까운 상태의 게시물을 황금밸런스라고 한답니다! A와 B의 우열을 가릴 수 없는 상태라고 보면 되겠죠?">황금밸런스란?
+        </button>
     </div>
 
     <div class="container" id="container">
     </div>
 
+
+    <!-- jinja template -->
     <script>
-        let lists = JSON.parse({{ items | tojson | safe }})
-        console.log(lists)
+        let lists = JSON.parse({{items | tojson | safe}})
 
         for (let i = 0; i < lists.length; i++) {
-            let temp_html = ``
+            let temp_html = `<div class="row">`
 
-            for (let i = 0; i < lists.length; i++)
-            {
+            for (let i = 0; i < lists.length; i++) {
+                let idx = lists[i]['_id']['$oid']
                 let img_url_left = lists[i]['img_url_left']             // 왼쪽 이미지 url
                 let img_url_right = lists[i]['img_url_right']           // 오른쪽 이미지 url
-                let count_left = lists[i]['count_left']       // 왼쪽 추천 수
-                let count_right = lists[i]['count_right']     // 오른쪽 추천 수
+                let img_title_left = lists[i]['img_title_left']         // 왼쪽 이미지 제목
+                let img_title_right = lists[i]['img_title_right']         // 오른쪽 이미지 제목
+                let count_left = lists[i]['count_left']                 // 왼쪽 추천 수
+                let count_right = lists[i]['count_right']               // 오른쪽 추천 수
                 let likes = lists[i]['likes']                           // 해당 게시물의 좋아요 수
                 let views = lists[i]['views']                           // 해당 게시물의 조회 수
                 let golden = false                                      // 황금 밸런스 여부. 밑에서 계산
-                console.log(img_url_left, img_url_right)
 
-                // 황금 밸런스라면 주변에 황금 테두리를 보여주기 위해 계산. 비율은 47:53까지
-                if ((count_right + count_left != 0) && (Math.abs(count_left-count_right)/(count_left+count_right)*100 <= 3))
+                if ((count_right + count_left != 0) && (Math.abs(count_left - count_right) / (count_left + count_right) * 100 <= 3))
                     golden = true
 
-                // 지금 1row당 3개씩 보여주고 있기 때문에 html태그가 약간 다름
-                // 처음
-                if (i%3 == 0) {
-                   temp_html += `<div class="row">
-                                    <div class="col">
-                                        <div class="product-box" onclick="show_detail()">
-                                            <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                            background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                            <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                            background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
+                if (golden) {
+                    temp_html += `<div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="golden-product-box" onclick="show_detail('${idx}')" id="${idx}">
+                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
+                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
+                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
+                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"></div>
+                                    <div style="float: left;"
+                                    <div class="row">
+                                        <div class="col-8 ellipsis" style="text-align: left;">
+                                            <label style="display: block; width:195px;">
+                                                <span style="font-size: 12px;">
+                                                    ${img_title_left} vs ${img_title_right}
+                                                </span>
+                                            </label>
                                         </div>
-                                    </div>`
-                }
-                // 끝번
-                else if (i%3 == 2){
-                    temp_html += `<div class="col">
-                                        <div class="product-box" onclick="show_detail()">
-                                            <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                            background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                            <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                            background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
+                                        <div class="col-4" style="text-align: right;">
+                                            <span style="font-size: 12px">
+                                                <span style="color: red"><i class="fas fa-heart"></i></span>${likes}
+                                                <i class="far fa-eye"></i>${views}
+                                            </span>
                                         </div>
                                     </div>
-                                 </div>`
-                }
-                // 2번 또는 column이 늘어나면 자동으로
-                else {
-                    temp_html += `<div class="col">
-                                        <div class="product-box" onclick="show_detail()">
-                                            <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
-                                            background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
-                                            <div style="width:50%; height:150px; background-image: url('${img_url_right}');
-                                            background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"><div style="color: white; text-align: right; vertical-align: bottom">${likes}${views}</div></div>
+                                </div>
+                            </div>`
+                } else {
+                    temp_html += `<div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="product-box" onclick="show_detail('${idx}')" id="${idx}">
+                                    <div style="float: left; width:50%; height:150px; background-image: url('${img_url_left}');
+                                    background-repeat:no-repeat; background-size: cover; background-position: center top; display: flex "></div>
+                                    <div style="width:50%; height:150px; background-image: url('${img_url_right}');
+                                    background-repeat: no-repeat; background-size: cover; background-position: center top; display: flex"></div>
+                                    <div style="float: left;"
+                                    <div class="row">
+                                        <div class="col-8 ellipsis" style="text-align: left;">
+                                            <label style="display: block; width:195px;">
+                                                <span style="font-size: 12px;">
+                                                    ${img_title_left} vs ${img_title_right}
+                                                </span>
+                                            </label>
                                         </div>
-                                 </div>`
+                                        <div class="col-4" style="text-align: right;">
+                                            <span style="font-size: 12px">
+                                                <span style="color: red"><i class="fas fa-heart"></i></span>${likes}
+                                                <i class="far fa-eye"></i>${views}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
                 }
             }
+
+            temp_html += `</div>`
 
             // 해당 컨테이너를 한 번 비우고 html을 붙임. 최근 30개정도 보여주면 될것 같은데 무한스크롤?
             $('#container').empty()
             $('#container').append(temp_html)
         }
     </script>
+</section>
+<footer class="footer">
+    <img class="footer-image" src="../static/img/balance-scale.png" alt="Logo">
+    <h1 class="footer-title">골라보세요 밸런스게임!</h1>
+    <p class="footer-desc">
+        항해99 1주차 웹개발 미니 프로젝트<br>
+        5기 D반 8조 (구름, 공정용, 정요한, 최세연)
+    </p>
+    <a class="footer-icon" href="https://github.com/John3210of/hanghae_D8" target="_blank">
+        <i class="fab fa-github"></i>
+    </a>
+</footer>
 </body>
 </html>
